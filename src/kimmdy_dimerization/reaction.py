@@ -15,6 +15,7 @@ from kimmdy.parsing import (
 )
 
 import MDAnalysis as mda
+from collections import defaultdict
 
 logger = logging.getLogger("kimmdy.dimerization")
 
@@ -35,13 +36,25 @@ class DimerizationReaction(ReactionPlugin):
         gro = files.input["gro"]
         trr = files.input["trr"]
         universe = mda.Universe(str(gro), str(trr))
-        length_of_traj = len(universe.trajectory)
+        selection = universe.select_atoms("name C5 C6 and resname DT5 DT DT3")
+        residue_atoms = defaultdict(dict)
+
+        for atom in selection:
+            residue = atom.resid
+            resname = atom.resname
+            if atom.name in ("C5", "C6"):
+                residue_atoms[(resname, residue)][atom.name] = atom.index
+        c5_c6_tuples = [
+            (atoms["C5"], atoms["C6"])
+            for atoms in residue_atoms.values()
+            if "C5" in atoms and "C6" in atoms
+        ]
+        logger.info(f"Found those tuples {c5_c6_tuples}.")
+
         end_time = universe.trajectory[-1].time
-        logger.info(f"Length of trajectory is {length_of_traj}, final time is {end_time} ps.")
         logger.debug("Getting recipe for reaction: Dimerization")
 
         recipes = []
-        # check distances file for values lower than the cutoff
 
         recipes.append(
                     Recipe(
