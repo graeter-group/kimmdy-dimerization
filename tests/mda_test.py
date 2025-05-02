@@ -6,11 +6,16 @@ from MDAnalysis.analysis.dihedrals import Dihedral
 from kimmdy.recipe import (
     Bind,
     Recipe,
-    RecipeCollection,
+    RecipeCollection, CustomTopMod,
 )
+from kimmdy.topology.topology import Topology
 
 
+def calculate_rate(k1_in, k2_in, d0_in, n0_in, distance_in, angle_in):
+    return math.exp(-(k1_in * abs(distance_in - d0_in) + k2_in * abs(angle_in - n0_in)))
 
+def f(top: Topology) -> Topology:
+    pass
 
 gro = "equilibrium.gro"
 trr = "equilibrium.trr"
@@ -63,10 +68,12 @@ for frame_idx, rates in enumerate(rates_time_resolved):
             Recipe(
                 recipe_steps=[
                     Bind(atom_id_1="14", atom_id_2="46"),
-                    Bind(atom_id_1="12", atom_id_2="44")
+                    Bind(atom_id_1="12", atom_id_2="44"),
+                    CustomTopMod(f)
                     ],
                 rates=[rate[2]],
                 timespans=[(time_start, time_end)],
             )
         )
     time_start = time_end
+

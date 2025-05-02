@@ -2,11 +2,12 @@ from kimmdy.recipe import (
     Bind,
     Recipe,
     RecipeCollection,
+    CustomTopMod
 )
 from kimmdy.plugins import ReactionPlugin
 from kimmdy.tasks import TaskFiles
 import logging
-
+from kimmdy.topology.topology import Topology
 from MDAnalysis.analysis.dihedrals import Dihedral
 import MDAnalysis as mda
 import numpy as np
@@ -23,6 +24,23 @@ def calculate_rate(k1_in, k2_in, d0_in, n0_in, distance_in, angle_in):
 class DimerizationReaction(ReactionPlugin):
     """A Reaction Plugin for Dimerization in DNA
     """
+    @staticmethod
+    def change_top(self, res_a, res_b):
+        change_dict = {"C6": "CT", "C5": "CT", "H6": "H1", "N1": "N"}
+
+        def f(top: Topology) -> Topology:
+            # Change residue types
+            for atom in top.atoms.values():
+                if atom.resnr == res_a or atom.resnr == res_b:
+                    atom.residue = atom.residue.replace("T", "D")
+            # Change atomtypes
+            for atom in top.atoms.values():
+                if atom.resnr == res_a or atom.resnr == res_b:
+                    if atom.atom in change_dict.keys():
+                        atom.type = change_dict[atom.atom]
+            return top
+
+        return CustomTopMod(f)
 
     def get_recipe_collection(self, files: TaskFiles):
         logger = files.logger
@@ -78,11 +96,14 @@ class DimerizationReaction(ReactionPlugin):
             else:
                 time_end = time_start
             for rate in rates:
+                res_a = rate[0]
+                res_b = rate[1]
                 recipes.append(
                     Recipe(
                         recipe_steps=[
-                            Bind(atom_id_1=f"{int(time_start+1)}", atom_id_2="46"),
-                            Bind(atom_id_1="12", atom_id_2="44")
+                            Bind(atom_id_1="14", atom_id_2="46"),
+                            Bind(atom_id_1="12", atom_id_2="44"),
+                            self.change_top(self, res_a, res_b)
                         ],
                         rates=[rate[2]],
                         timespans=[(time_start, time_end)],
