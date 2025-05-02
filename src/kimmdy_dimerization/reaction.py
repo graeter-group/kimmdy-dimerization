@@ -45,15 +45,13 @@ class DimerizationReaction(ReactionPlugin):
             # Find improper dihedrals at C5 and C6 that need to be removed
             dihedrals_to_remove = []
             for dihedral_key in top.improper_dihedrals.keys():
-                dihedral_val = top.improper_dihedrals[dihedral_key]
-                logger.info(f"{dihedral_key}, {dihedral_val}")
-                if (c5_a.nr in dihedral_val and c6_a.nr in dihedral_val) or (c5_b.nr in dihedral_val and c6_b.nr in dihedral_val):
+                logger.info(f"{dihedral_key}")
+                if (c5_a.nr in dihedral_key and c6_a.nr in dihedral_key) or (c5_b.nr in dihedral_key and c6_b.nr in dihedral_key):
                     dihedrals_to_remove.append(dihedral_key)
             for dihedral_key in dihedrals_to_remove:
-                dihedral_val = top.improper_dihedrals[dihedral_key]
-                logger.info(f"Removed improper dihedral {dihedral_key}, {dihedral_val}")
+                logger.info(f"Removed improper dihedral {dihedral_key}")
                 top.improper_dihedrals.pop(dihedral_key, None)
-            
+
             # Change residue types
             for atom in top.atoms.values():
                 if atom.resnr == res_a or atom.resnr == res_b:
