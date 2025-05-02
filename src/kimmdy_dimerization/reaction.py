@@ -77,18 +77,31 @@ class DimerizationReaction(ReactionPlugin):
                 time_end = universe.trajectory[frame_idx + 1].time
             else:
                 time_end = time_start
-            for rate in rates:
-                recipes.append(
-                    Recipe(
-                        recipe_steps=[
-                            Bind(atom_id_1="14", atom_id_2="46"),
-                            Bind(atom_id_1="12", atom_id_2="44")
-                        ],
-                        rates=[rate[2]],
-                        timespans=[(time_start, time_end)],
+            if time_start == 0:
+                for rate in rates:
+                    recipes.append(
+                        Recipe(
+                            recipe_steps=[
+                                Bind(atom_id_1="15", atom_id_2="46"),
+                                Bind(atom_id_1="12", atom_id_2="44")
+                            ],
+                            rates=[rate[2]],
+                            timespans=[(time_start, time_end)],
+                        )
                     )
-                )
+            else:
+                for rate in rates:
+                    recipes.append(
+                        Recipe(
+                            recipe_steps=[
+                                Bind(atom_id_1="14", atom_id_2="46"),
+                                Bind(atom_id_1="12", atom_id_2="44")
+                            ],
+                            rates=[rate[2]],
+                            timespans=[(time_start, time_end)],
+                        )
+                    )
             time_start = time_end
-            
+
         logger.info(f"Found rates {rates_time_resolved}")
         return RecipeCollection(recipes)
