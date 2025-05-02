@@ -27,6 +27,8 @@ class DimerizationReaction(ReactionPlugin):
     @staticmethod
     def change_top(self, res_a, res_b):
         change_dict = {"C6": "CT", "C5": "CT", "H6": "H1", "N1": "N"}
+        res_a = str(res_a)
+        res_b = str(res_b)
 
         def f(top: Topology) -> Topology:
             # Change residue types
