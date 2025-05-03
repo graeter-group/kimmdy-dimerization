@@ -2,7 +2,8 @@ from kimmdy.recipe import (
     Bind,
     Recipe,
     RecipeCollection,
-    CustomTopMod
+    CustomTopMod,
+    Relax
 )
 from kimmdy.plugins import ReactionPlugin
 from kimmdy.tasks import TaskFiles
@@ -45,7 +46,6 @@ class DimerizationReaction(ReactionPlugin):
             # Find improper dihedrals at C5 and C6 that need to be removed
             dihedrals_to_remove = []
             for dihedral_key in top.improper_dihedrals.keys():
-                logger.info(f"{dihedral_key}")
                 if (c5_a.nr in dihedral_key and c6_a.nr in dihedral_key) or (c5_b.nr in dihedral_key and c6_b.nr in dihedral_key):
                     dihedrals_to_remove.append(dihedral_key)
             for dihedral_key in dihedrals_to_remove:
@@ -126,7 +126,8 @@ class DimerizationReaction(ReactionPlugin):
                         recipe_steps=[
                             Bind(atom_id_1="14", atom_id_2="46"),
                             Bind(atom_id_1="12", atom_id_2="44"),
-                            self.change_top(self, res_a, res_b)
+                            self.change_top(self, res_a, res_b),
+                            Relax()
                         ],
                         rates=[rate[2]],
                         timespans=[(time_start, time_end)],
