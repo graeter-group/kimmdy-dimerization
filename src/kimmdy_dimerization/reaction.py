@@ -124,9 +124,9 @@ class DimerizationReaction(ReactionPlugin):
                 recipes.append(
                     Recipe(
                         recipe_steps=[
+                            self.change_top(self, res_a, res_b),
                             Bind(atom_id_1="14", atom_id_2="46"),
                             Bind(atom_id_1="12", atom_id_2="44"),
-                            self.change_top(self, res_a, res_b),
                             Relax()
                         ],
                         rates=[rate[2]],
