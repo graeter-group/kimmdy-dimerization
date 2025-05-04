@@ -127,7 +127,6 @@ class DimerizationReaction(ReactionPlugin):
                             self.change_top(self, res_a, res_b),
                             Bind(atom_id_1="14", atom_id_2="46"),
                             Bind(atom_id_1="12", atom_id_2="44"),
-                            Relax()
                         ],
                         rates=[rate[2]],
                         timespans=[(time_start, time_end)],
