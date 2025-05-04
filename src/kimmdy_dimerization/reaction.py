@@ -14,6 +14,7 @@ import MDAnalysis as mda
 import numpy as np
 import math
 import json
+from importlib.resources import files
 from itertools import combinations
 
 logger = logging.getLogger("kimmdy.dimerization")
@@ -26,10 +27,12 @@ def calculate_rate(k1_in, k2_in, d0_in, n0_in, distance_in, angle_in):
 class DimerizationReaction(ReactionPlugin):
     """A Reaction Plugin for Dimerization in DNA
     """
-
-    def change_top(self, res_a, res_b):
+    @staticmethod
+    def change_top(res_a, res_b):
         change_dict = {"C6": "CT", "C5": "CT", "H6": "H1", "N1": "N"}
-        with open("new_charges.json", "r") as f:
+
+        path = files("kimmdy_dimerization.data") / "new_charges.json"
+        with path.open("r", encoding="utf-8") as f:
             new_charges = json.load(f)
         res_a = str(res_a)
         res_b = str(res_b)
