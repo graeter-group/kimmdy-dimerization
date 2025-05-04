@@ -13,6 +13,7 @@ from MDAnalysis.analysis.dihedrals import Dihedral
 import MDAnalysis as mda
 import numpy as np
 import math
+import json
 from itertools import combinations
 
 logger = logging.getLogger("kimmdy.dimerization")
@@ -25,8 +26,11 @@ def calculate_rate(k1_in, k2_in, d0_in, n0_in, distance_in, angle_in):
 class DimerizationReaction(ReactionPlugin):
     """A Reaction Plugin for Dimerization in DNA
     """
+
     def change_top(self, res_a, res_b):
         change_dict = {"C6": "CT", "C5": "CT", "H6": "H1", "N1": "N"}
+        with open("new_charges.json", "r") as f:
+            new_charges = json.load(f)
         res_a = str(res_a)
         res_b = str(res_b)
 
@@ -45,7 +49,8 @@ class DimerizationReaction(ReactionPlugin):
             # Find improper dihedrals at C5 and C6 that need to be removed
             dihedrals_to_remove = []
             for dihedral_key in top.improper_dihedrals.keys():
-                if (c5_a.nr in dihedral_key and c6_a.nr in dihedral_key) or (c5_b.nr in dihedral_key and c6_b.nr in dihedral_key):
+                if (c5_a.nr in dihedral_key and c6_a.nr in dihedral_key) or (
+                        c5_b.nr in dihedral_key and c6_b.nr in dihedral_key):
                     dihedrals_to_remove.append(dihedral_key)
             for dihedral_key in dihedrals_to_remove:
                 logger.info(f"Removed improper dihedral {dihedral_key}")
@@ -63,7 +68,7 @@ class DimerizationReaction(ReactionPlugin):
             # Change charges (already present in ff for new residue type)
             for atom in top.atoms.values():
                 if atom.resnr == res_a or atom.resnr == res_b:
-                    atom.charge = self.runmng.top.ff.residuetypes[atom.residue].atoms[atom.atom].charge
+                    atom.charge = new_charges[atom.residue][atom.atom]
             return top
 
         return CustomTopMod(f)
@@ -127,7 +132,7 @@ class DimerizationReaction(ReactionPlugin):
                 recipes.append(
                     Recipe(
                         recipe_steps=[
-                            self.change_top(self, res_a, res_b),
+                            self.change_top(res_a, res_b),
                             Bind(atom_id_1="14", atom_id_2="46"),
                             Bind(atom_id_1="12", atom_id_2="44"),
                         ],
