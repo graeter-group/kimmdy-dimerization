@@ -25,7 +25,6 @@ def calculate_rate(k1_in, k2_in, d0_in, n0_in, distance_in, angle_in):
 class DimerizationReaction(ReactionPlugin):
     """A Reaction Plugin for Dimerization in DNA
     """
-    @staticmethod
     def change_top(self, res_a, res_b):
         change_dict = {"C6": "CT", "C5": "CT", "H6": "H1", "N1": "N"}
         res_a = str(res_a)
@@ -61,6 +60,10 @@ class DimerizationReaction(ReactionPlugin):
                 if atom.resnr == res_a or atom.resnr == res_b:
                     if atom.atom in change_dict.keys():
                         atom.type = change_dict[atom.atom]
+            # Change charges (already present in ff for new residue type)
+            for atom in top.atoms.values():
+                if atom.resnr == res_a or atom.resnr == res_b:
+                    atom.charge = self.runmng.top.ff.residuetypes[atom.residue].atoms[atom.atom].charge
             return top
 
         return CustomTopMod(f)
