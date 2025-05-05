@@ -72,6 +72,13 @@ class DimerizationReaction(ReactionPlugin):
             for atom in top.atoms.values():
                 if atom.resnr == res_a or atom.resnr == res_b:
                     atom.charge = new_charges[atom.residue][atom.atom]
+
+            # Remove faulty pairs
+            top.pairs.pop((c6_a.nr, c6_b.nr))
+            top.pairs.pop((c5_a.nr, c5_b.nr))
+            top.pairs.pop((c6_a.nr, c5_a.nr))
+            top.pairs.pop((c6_b.nr, c5_b.nr))
+
             return top
 
         return CustomTopMod(f)
@@ -135,9 +142,9 @@ class DimerizationReaction(ReactionPlugin):
                 recipes.append(
                     Recipe(
                         recipe_steps=[
-                            self.change_top(res_a, res_b),
                             Bind(atom_id_1="14", atom_id_2="46"),
                             Bind(atom_id_1="12", atom_id_2="44"),
+                            self.change_top(res_a, res_b)
                         ],
                         rates=[rate[2]],
                         timespans=[(time_start, time_end)],
