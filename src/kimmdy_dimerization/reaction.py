@@ -74,10 +74,10 @@ class DimerizationReaction(ReactionPlugin):
                     atom.charge = new_charges[atom.residue][atom.atom]
 
             # Remove faulty pairs
-            top.pairs.pop((c6_a.nr, c6_b.nr))
-            top.pairs.pop((c5_a.nr, c5_b.nr))
-            top.pairs.pop((c6_a.nr, c5_a.nr))
-            top.pairs.pop((c6_b.nr, c5_b.nr))
+            top.pairs.pop((c6_a.nr, c6_b.nr), None)
+            top.pairs.pop((c5_a.nr, c5_b.nr), None)
+            top.pairs.pop((c6_a.nr, c5_a.nr), None)
+            top.pairs.pop((c6_b.nr, c5_b.nr), None)
 
             return top
 
@@ -98,6 +98,8 @@ class DimerizationReaction(ReactionPlugin):
         c5s = universe.select_atoms("name C5 and resname DT5 DT DT3")
         c6s = universe.select_atoms("name C6 and resname DT5 DT DT3")
         c5_c6s = [(c5, c6) for c5, c6 in zip(c5s, c6s)]
+        residue_dict_c5 = {int(c5.resid): c5.ix for c5 in c5s}
+        residue_dict_c6 = {int(c6.resid): c6.ix for c6 in c6s}
 
         # Dihedrals
         dihedrals_time_resolved = [[] for _ in range(0, len(universe.trajectory))]
@@ -139,12 +141,14 @@ class DimerizationReaction(ReactionPlugin):
             for rate in rates:
                 res_a = rate[0]
                 res_b = rate[1]
+                logger.info(f"Atom indices: C5_a {residue_dict_c5[res_a]}, C6_a {residue_dict_c6[res_a]}, C5_b {residue_dict_c5[res_b]}, C6_b {residue_dict_c6[res_b]}")
                 recipes.append(
                     Recipe(
                         recipe_steps=[
                             Bind(atom_id_1="14", atom_id_2="46"),
                             Bind(atom_id_1="12", atom_id_2="44"),
-                            self.change_top(res_a, res_b)
+                            self.change_top(res_a, res_b),
+                            Relax()
                         ],
                         rates=[rate[2]],
                         timespans=[(time_start, time_end)],
