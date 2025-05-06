@@ -141,12 +141,11 @@ class DimerizationReaction(ReactionPlugin):
             for rate in rates:
                 res_a = rate[0]
                 res_b = rate[1]
-                logger.info(f"Atom indices: C5_a {residue_dict_c5[res_a]}, C6_a {residue_dict_c6[res_a]}, C5_b {residue_dict_c5[res_b]}, C6_b {residue_dict_c6[res_b]}")
                 recipes.append(
                     Recipe(
                         recipe_steps=[
-                            Bind(atom_id_1="14", atom_id_2="46"),
-                            Bind(atom_id_1="12", atom_id_2="44"),
+                            Bind(atom_id_1=str(residue_dict_c5[res_a]+1), atom_id_2=str(residue_dict_c5[res_b]+1)),
+                            Bind(atom_id_1=str(residue_dict_c6[res_a]+1), atom_id_2=str(residue_dict_c6[res_b]+1)),
                             self.change_top(res_a, res_b),
                             Relax()
                         ],
