@@ -131,7 +131,8 @@ class DimerizationReaction(ReactionPlugin):
                 rates_time_resolved[time_idx].append(
                     (distance[0], distance[1], calculate_rate(k1, k2, d0, n0, distance[2], angle[2])))
 
-        recipes = []
+        # Group by reaction
+        reactions = {}
         time_start = 0
         for frame_idx, rates in enumerate(rates_time_resolved):
             if frame_idx != len(universe.trajectory) - 1:
@@ -139,21 +140,34 @@ class DimerizationReaction(ReactionPlugin):
             else:
                 time_end = time_start
             for rate in rates:
-                res_a = rate[0]
-                res_b = rate[1]
-                recipes.append(
-                    Recipe(
-                        recipe_steps=[
-                            Bind(atom_id_1=str(residue_dict_c5[res_a]+1), atom_id_2=str(residue_dict_c5[res_b]+1)),
-                            Bind(atom_id_1=str(residue_dict_c6[res_a]+1), atom_id_2=str(residue_dict_c6[res_b]+1)),
-                            self.change_top(res_a, res_b),
-                            Relax()
-                        ],
-                        rates=[rate[2]],
-                        timespans=[(time_start, time_end)],
-                    )
-                )
+                if (rate[0], rate[1]) not in reactions.keys():
+                    reactions[(rate[0], rate[1])] = [(rate, time_start, time_end)]
+                else:
+                    reactions[(rate[0], rate[1])].append((rate, time_start, time_end))
             time_start = time_end
+        logger.info(f"Found reactions with rates {reactions}")
 
-        logger.info(f"Found rates {rates_time_resolved}")
+        recipes = []
+        for reaction_key in reactions.keys():
+            reaction = reactions[reaction_key]
+            rates = [a[0][2] for a in reaction]
+            timespans = [(a[1], a[2]) for a in reaction]
+            res_a = reaction_key[0]
+            res_b = reaction_key[1]
+
+            steps = [
+                Bind(atom_id_1=str(residue_dict_c5[res_a]+1), atom_id_2=str(residue_dict_c5[res_b]+1)),
+                Bind(atom_id_1=str(residue_dict_c6[res_a]+1), atom_id_2=str(residue_dict_c6[res_b]+1)),
+                self.change_top(res_a, res_b),
+                Relax()
+            ]
+            recipes.append(
+                Recipe(
+                    recipe_steps=steps,
+                    rates=rates,
+                    timespans=timespans
+                )
+            )
+        logger.info(f"Recipe collection {recipes}")
+
         return RecipeCollection(recipes)
