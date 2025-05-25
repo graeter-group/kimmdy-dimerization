@@ -14,6 +14,7 @@ import MDAnalysis as mda
 import numpy as np
 import math
 import json
+import os
 from importlib.resources import files
 from itertools import combinations
 
@@ -129,7 +130,7 @@ class DimerizationReaction(ReactionPlugin):
         for time_idx, (distances, angles) in enumerate(zip(dists_time_resolved, dihedrals_time_resolved)):
             for distance, angle in zip(distances, angles):
                 rates_time_resolved[time_idx].append(
-                    (distance[0], distance[1], calculate_rate(k1, k2, d0, n0, distance[2], angle[2])))
+                    (distance[0], distance[1], calculate_rate(k1, k2, d0, n0, distance[2], angle[2]), distance[2], angle[2]))
 
         # Group by reaction
         reactions = {}
@@ -145,15 +146,24 @@ class DimerizationReaction(ReactionPlugin):
                 else:
                     reactions[(rate[0], rate[1])].append((rate, time_start, time_end))
             time_start = time_end
-        logger.info(f"Found reactions with rates {reactions}")
+
+        output_path = os.path.join(files.outputdir, "reaction_rates.csv")
+        output_file = open(output_path, "w")
+
 
         recipes = []
         for reaction_key in reactions.keys():
             reaction = reactions[reaction_key]
             rates = [a[0][2] for a in reaction]
+            distances = [a[0][3] for a in reaction]
+            angles = [a[0][4] for a in reaction]
             timespans = [(a[1], a[2]) for a in reaction]
             res_a = reaction_key[0]
             res_b = reaction_key[1]
+            output_file.write(f"Residues {res_a} {res_b}\n")
+            output_file.write(f"Distances {distances} \n")
+            output_file.write(f"Angles {angles} \n")
+            output_file.write(f"Rates {rates} \n")
 
             steps = [
                 Bind(atom_id_1=str(residue_dict_c5[res_a]+1), atom_id_2=str(residue_dict_c5[res_b]+1)),
@@ -168,6 +178,7 @@ class DimerizationReaction(ReactionPlugin):
                     timespans=timespans
                 )
             )
-        logger.info(f"Recipe collection {recipes}")
+
+        output_file.close()
 
         return RecipeCollection(recipes)
