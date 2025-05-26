@@ -93,7 +93,7 @@ class DimerizationReaction(ReactionPlugin):
         d0 = self.config.d0  # Optimal distance [nm]
         n0 = self.config.n0  # Optimal angle [deg]
         reslist = self.config.reslist # Residues that should be considered for reactions
-
+        reslist = [int(a) for a in reslist.split(".")]
 
         gro = files.input["gro"]
         trr = files.input["trr"]
