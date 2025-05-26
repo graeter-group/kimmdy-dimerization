@@ -92,12 +92,16 @@ class DimerizationReaction(ReactionPlugin):
         k2 = self.config.k2  # Angle scaling [1/deg]
         d0 = self.config.d0  # Optimal distance [nm]
         n0 = self.config.n0  # Optimal angle [deg]
+        reslist = self.config.reslist # Residues that should be considered for reactions
+
 
         gro = files.input["gro"]
         trr = files.input["trr"]
         universe = mda.Universe(str(gro), str(trr))
         c5s = universe.select_atoms("name C5 and resname DT5 DT DT3")
         c6s = universe.select_atoms("name C6 and resname DT5 DT DT3")
+        c5s = [a for a in c5s if int(a.resid) in reslist]
+        c6s = [a for a in c6s if int(a.resid) in reslist]
         c5_c6s = [(c5, c6) for c5, c6 in zip(c5s, c6s)]
         residue_dict_c5 = {int(c5.resid): c5.ix for c5 in c5s}
         residue_dict_c6 = {int(c6.resid): c6.ix for c6 in c6s}
