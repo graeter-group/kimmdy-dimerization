@@ -7,6 +7,7 @@ on:
 permissions:
   contents: write
   pull-requests: write
+  issues: write
 
 jobs:
   release:
@@ -29,4 +30,6 @@ jobs:
           git push origin :stable || true
           git tag -a stable -m "Latest Stable Release"
           git push origin stable
+
+          
 
