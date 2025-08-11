@@ -1,10 +1,4 @@
-from kimmdy.recipe import (
-    Bind,
-    Recipe,
-    RecipeCollection,
-    CustomTopMod,
-    Relax
-)
+from kimmdy.recipe import Bind, Recipe, RecipeCollection, CustomTopMod, Relax
 from kimmdy.plugins import ReactionPlugin
 from kimmdy.tasks import TaskFiles
 import logging
@@ -26,8 +20,8 @@ def calculate_rate(k1_in, k2_in, d0_in, n0_in, distance_in, angle_in):
 
 
 class DimerizationReaction(ReactionPlugin):
-    """A Reaction Plugin for Dimerization in DNA
-    """
+    """A Reaction Plugin for Dimerization in DNA"""
+
     @staticmethod
     def change_top(res_a, res_b):
         change_dict = {"C6": "CT", "C5": "CT", "H6": "H1", "N1": "N"}
@@ -54,7 +48,8 @@ class DimerizationReaction(ReactionPlugin):
             dihedrals_to_remove = []
             for dihedral_key in top.improper_dihedrals.keys():
                 if (c5_a.nr in dihedral_key and c6_a.nr in dihedral_key) or (
-                        c5_b.nr in dihedral_key and c6_b.nr in dihedral_key):
+                    c5_b.nr in dihedral_key and c6_b.nr in dihedral_key
+                ):
                     dihedrals_to_remove.append(dihedral_key)
             for dihedral_key in dihedrals_to_remove:
                 logger.info(f"Removed improper dihedral {dihedral_key}")
@@ -115,31 +110,63 @@ class DimerizationReaction(ReactionPlugin):
         dihedrals_time_resolved = [[] for _ in range(0, len(universe.trajectory))]
         for reactive_four in combinations(c5_c6s, r=2):
             dihedral_group = mda.AtomGroup(
-                [reactive_four[0][0], reactive_four[0][1], reactive_four[1][1], reactive_four[1][0]])
+                [
+                    reactive_four[0][0],
+                    reactive_four[0][1],
+                    reactive_four[1][1],
+                    reactive_four[1][0],
+                ]
+            )
             dih = Dihedral([dihedral_group])
             dih.run()
             for time_idx, ang in enumerate(dih.results.angles):
                 dihedrals_time_resolved[time_idx].append(
-                    (int(reactive_four[0][0].resid), int(reactive_four[1][0].resid), float(ang[0])))
+                    (
+                        int(reactive_four[0][0].resid),
+                        int(reactive_four[1][0].resid),
+                        float(ang[0]),
+                    )
+                )
 
         # Distances
         dists_time_resolved = []
         for _ in universe.trajectory:
-            vecs_c5_1_c5_2 = [(c5_1.resid, c5_2.resid, c5_2.position - c5_1.position) for c5_1, c5_2 in
-                              combinations(c5s, r=2)]
-            vecs_c6_1_c6_2 = [(c6_1.resid, c6_2.resid, c6_2.position - c6_1.position) for c6_1, c6_2 in
-                              combinations(c6s, r=2)]
-            dists = [(int(vec_c5_1_c5_2[0]), int(vec_c5_1_c5_2[1]),
-                      0.1 * float(np.linalg.norm(0.5 * (vec_c5_1_c5_2[2] + vecs_c6_1_c6_2[2]))))
-                     for vec_c5_1_c5_2, vecs_c6_1_c6_2 in zip(vecs_c5_1_c5_2, vecs_c6_1_c6_2)]
+            vecs_c5_1_c5_2 = [
+                (c5_1.resid, c5_2.resid, c5_2.position - c5_1.position)
+                for c5_1, c5_2 in combinations(c5s, r=2)
+            ]
+            vecs_c6_1_c6_2 = [
+                (c6_1.resid, c6_2.resid, c6_2.position - c6_1.position)
+                for c6_1, c6_2 in combinations(c6s, r=2)
+            ]
+            dists = [
+                (
+                    int(vec_c5_1_c5_2[0]),
+                    int(vec_c5_1_c5_2[1]),
+                    0.1
+                    * float(
+                        np.linalg.norm(0.5 * (vec_c5_1_c5_2[2] + vecs_c6_1_c6_2[2]))
+                    ),
+                )
+                for vec_c5_1_c5_2, vecs_c6_1_c6_2 in zip(vecs_c5_1_c5_2, vecs_c6_1_c6_2)
+            ]
             dists_time_resolved.append(dists)
 
         # Rate calculation
         rates_time_resolved = [[] for _ in range(0, len(universe.trajectory))]
-        for time_idx, (distances, angles) in enumerate(zip(dists_time_resolved, dihedrals_time_resolved)):
+        for time_idx, (distances, angles) in enumerate(
+            zip(dists_time_resolved, dihedrals_time_resolved)
+        ):
             for distance, angle in zip(distances, angles):
                 rates_time_resolved[time_idx].append(
-                    (distance[0], distance[1], calculate_rate(k1, k2, d0, n0, distance[2], angle[2]), distance[2], angle[2]))
+                    (
+                        distance[0],
+                        distance[1],
+                        calculate_rate(k1, k2, d0, n0, distance[2], angle[2]),
+                        distance[2],
+                        angle[2],
+                    )
+                )
 
         # Group by reaction
         reactions = {}
@@ -159,7 +186,6 @@ class DimerizationReaction(ReactionPlugin):
         output_path = os.path.join(files.outputdir, "reaction_rates.csv")
         output_file = open(output_path, "w")
 
-
         recipes = []
         for reaction_key in reactions.keys():
             reaction = reactions[reaction_key]
@@ -175,18 +201,18 @@ class DimerizationReaction(ReactionPlugin):
             output_file.write(f"Rates {rates} \n")
 
             steps = [
-                Bind(atom_id_1=str(residue_dict_c5[res_a]+1), atom_id_2=str(residue_dict_c5[res_b]+1)),
-                Bind(atom_id_1=str(residue_dict_c6[res_a]+1), atom_id_2=str(residue_dict_c6[res_b]+1)),
+                Bind(
+                    atom_id_1=str(residue_dict_c5[res_a] + 1),
+                    atom_id_2=str(residue_dict_c5[res_b] + 1),
+                ),
+                Bind(
+                    atom_id_1=str(residue_dict_c6[res_a] + 1),
+                    atom_id_2=str(residue_dict_c6[res_b] + 1),
+                ),
                 self.change_top(res_a, res_b),
-                Relax()
+                Relax(),
             ]
-            recipes.append(
-                Recipe(
-                    recipe_steps=steps,
-                    rates=rates,
-                    timespans=timespans
-                )
-            )
+            recipes.append(Recipe(recipe_steps=steps, rates=rates, timespans=timespans))
 
         output_file.close()
 
