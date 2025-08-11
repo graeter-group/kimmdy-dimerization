@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "kimmdy-dimerization"
-version = "0.1"
+version = "0.1.0"
 license = {text = "GPL-3.0"}
 description = "Reaction plugin for KIMMDY describing the dimerization of thymines in DNA"
 readme = "README.md"
