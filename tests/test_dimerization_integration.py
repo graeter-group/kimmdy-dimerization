@@ -20,10 +20,9 @@ def read_last_line(file):
 @pytest.mark.parametrize(
     "arranged_tmp_path", (["test_dimerization_integration"]), indirect=True
 )
-@pytest.mark.slow
-def test_integration_hydrolysis_reaction(arranged_tmp_path):
+def test_integration_dimerization_reaction(arranged_tmp_path):
     print(arranged_tmp_path)
     kimmdy_run(input="TdT_kimmdy.yml")
 
     assert "Finished running last task" in read_last_line(Path("TdT_RX.kimmdy.log"))
-    assert len(list(Path.cwd().glob("TdT_RX_000/*"))) == 11
+    assert len(list(Path.cwd().glob("TdT_RX/*"))) == 12

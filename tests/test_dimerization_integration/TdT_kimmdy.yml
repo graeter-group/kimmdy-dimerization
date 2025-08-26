@@ -2,7 +2,7 @@ dryrun: false
 name: 'TdT_RX'
 max_tasks: 100
 gromacs_alias: 'gmx'
-gmx_mdrun_flags: '-maxh 24 -dlb yes  -nt 64 -npme 0 -ntmpi 1' 
+gmx_mdrun_flags: '-maxh 24 -dlb yes' 
 ff: 'amber14sb_OL21_mod.ff' # optional, dir endinng with .ff by default 
 top: 'TdT_NPT.top'
 gro: 'TdT_NPT.gro'
@@ -10,8 +10,6 @@ ndx: 'TdT_NPT.ndx'
 mds:
   equilibrium_short:
     mdp: 'TdT_md_short.mdp'
-  equilibrium_long:
-    mdp: 'TdT_md_long.mdp'
   relax:
     mdp: 'TdT_md_slow_growth.mdp'
 changer:
@@ -28,5 +26,6 @@ sequence:
 - equilibrium_short
 - mult: 1
   tasks:
-  - equilibrium_long
+  - equilibrium_short
   - reactions
+  - equilibrium_short
