@@ -40,5 +40,5 @@ where = ["src"]
 namespaces = false
 
 [tool.setuptools.package-data]
-kimmdy_dimerization.data = ["*.json"]
+kimmdy_dimerization = ["*.json"]
 
