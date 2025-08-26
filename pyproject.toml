@@ -22,6 +22,16 @@ dependencies = [
 [project.entry-points."kimmdy.reaction_plugins"]
 dimerization = "kimmdy_dimerization.reaction:DimerizationReaction"
 
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "pytest-cov",
+    "tox",
+    "tox",
+    "tox-uv",
+    "black",
+]
+
 [tool.setuptools]
 package-dir = {"" = "src"}
 include-package-data = true
