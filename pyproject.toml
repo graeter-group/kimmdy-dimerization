@@ -22,7 +22,7 @@ dependencies = [
 [project.entry-points."kimmdy.reaction_plugins"]
 dimerization = "kimmdy_dimerization.reaction:DimerizationReaction"
 
-[project.optional-dependencies]
+[dependency-groups]
 dev = [
     "pytest",
     "pytest-cov",
@@ -41,4 +41,5 @@ namespaces = false
 
 [tool.setuptools.package-data]
 kimmdy_dimerization = ["*.json"]
+"kimmdy_dimerization.data" = ["*.json"]
 
