@@ -29,6 +29,7 @@ def test_integration_dimerization_reaction(arranged_tmp_path):
     assert "Finished running last task" in read_last_line(Path("TdT_RX.kimmdy.log"))
     assert len(list(Path.cwd().glob("TdT_RX/*"))) == 12
 
+
 @pytest.mark.parametrize(
     "arranged_tmp_path", (["test_dimerization_integration"]), indirect=True
 )
@@ -48,9 +49,7 @@ def test_integration_dimerization_restart(arranged_tmp_path):
     kimmdy_run(input=Path("TdT_kimmdy_restart.yml"))
     n_files_continue_md = len(list(run_dir.glob("*")))
 
-    assert "Finished running last task" in read_last_line(
-        Path("TdT_RX.kimmdy.log")
-    )
+    assert "Finished running last task" in read_last_line(Path("TdT_RX.kimmdy.log"))
     assert n_files_original == n_files_continue_md == 12
 
     # try restart from finished md
@@ -60,7 +59,5 @@ def test_integration_dimerization_restart(arranged_tmp_path):
     kimmdy_run(input=Path("TdT_kimmdy_restart.yml"))
     n_files_restart = len(list(run_dir.glob("*")))
 
-    assert "Finished running last task" in read_last_line(
-        Path("TdT_RX.kimmdy.log")
-    )
+    assert "Finished running last task" in read_last_line(Path("TdT_RX.kimmdy.log"))
     assert n_files_original == n_files_restart == 12
