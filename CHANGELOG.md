@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.2.0](https://github.com/graeter-group/kimmdy-dimerization/compare/v0.1.0...v0.2.0) (2025-08-28)
+
+
+### Features
+
+* Integration test with KIMMDY ([#4](https://github.com/graeter-group/kimmdy-dimerization/issues/4)) ([65adae4](https://github.com/graeter-group/kimmdy-dimerization/commit/65adae4bde703096eb6ba1d03a80c6d3463af7ba))
+
+
+### Bug Fixes
+
+* remove __init__ ([#3](https://github.com/graeter-group/kimmdy-dimerization/issues/3)) ([e6f56f0](https://github.com/graeter-group/kimmdy-dimerization/commit/e6f56f06a06b2a2f5c98a9b6f5a8a5cd8d9b0f7a))
+
 ## 0.1.0 (2025-08-11)
 
 
