@@ -45,9 +45,9 @@ class DimerizationReaction(ReactionPlugin):
                 if atom.resnr == res_b and atom.atom == "C6":
                     c6_b = atom
 
-            assert not any([a is None for a in [c5_a, c5_b, c6_a, c6_b]]), (
-                "Error: New bond could not be determined!"
-            )
+            assert not any(
+                [a is None for a in [c5_a, c5_b, c6_a, c6_b]]
+            ), "Error: New bond could not be determined!"
 
             # Find improper dihedrals at C5 and C6 that need to be removed
             dihedrals_to_remove = []
