@@ -1,4 +1,5 @@
 /tests/createCharges.py
+kimmdy_dimerization_test.log
 
 tmp/
 tests/**/.*
