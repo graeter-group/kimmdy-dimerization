@@ -32,7 +32,8 @@ class DimerizationReaction(ReactionPlugin):
         res_a = str(res_a)
         res_b = str(res_b)
 
-        def f(top: Topology) -> Topology:
+        def _change_top(top: Topology) -> Topology:
+            c5_a = c5_b = c6_a = c6_b = None
             # Determine newly bonded atoms
             for atom in top.atoms.values():
                 if atom.resnr == res_a and atom.atom == "C5":
@@ -43,6 +44,10 @@ class DimerizationReaction(ReactionPlugin):
                     c5_b = atom
                 if atom.resnr == res_b and atom.atom == "C6":
                     c6_b = atom
+
+            assert not any(
+                [a is None for a in [c5_a, c5_b, c6_a, c6_b]]
+            ), "Error: New bond could not be determined!"
 
             # Find improper dihedrals at C5 and C6 that need to be removed
             dihedrals_to_remove = []
@@ -77,11 +82,9 @@ class DimerizationReaction(ReactionPlugin):
 
             return top
 
-        return CustomTopMod(f)
+        return CustomTopMod(_change_top)
 
     def get_recipe_collection(self, files: TaskFiles):
-        logger = files.logger
-
         # Get values from config
         k1 = self.config.k1  # Distance scaling [1/nm]
         k2 = self.config.k2  # Angle scaling [1/deg]
@@ -183,37 +186,36 @@ class DimerizationReaction(ReactionPlugin):
                     reactions[(rate[0], rate[1])].append((rate, time_start, time_end))
             time_start = time_end
 
-        output_path = os.path.join(files.outputdir, "reaction_rates.csv")
-        output_file = open(output_path, "w")
+        output_path = files.outputdir / "reaction_rates.csv"
+        with open(output_path, "w") as output_file:
+            recipes = []
+            for reaction_key in reactions.keys():
+                reaction = reactions[reaction_key]
+                rates = [a[0][2] for a in reaction]
+                distances = [a[0][3] for a in reaction]
+                angles = [a[0][4] for a in reaction]
+                timespans = [(a[1], a[2]) for a in reaction]
+                res_a = reaction_key[0]
+                res_b = reaction_key[1]
+                output_file.write(f"Residues {res_a} {res_b}\n")
+                output_file.write(f"Distances {distances} \n")
+                output_file.write(f"Angles {angles} \n")
+                output_file.write(f"Rates {rates} \n")
 
-        recipes = []
-        for reaction_key in reactions.keys():
-            reaction = reactions[reaction_key]
-            rates = [a[0][2] for a in reaction]
-            distances = [a[0][3] for a in reaction]
-            angles = [a[0][4] for a in reaction]
-            timespans = [(a[1], a[2]) for a in reaction]
-            res_a = reaction_key[0]
-            res_b = reaction_key[1]
-            output_file.write(f"Residues {res_a} {res_b}\n")
-            output_file.write(f"Distances {distances} \n")
-            output_file.write(f"Angles {angles} \n")
-            output_file.write(f"Rates {rates} \n")
-
-            steps = [
-                Bind(
-                    atom_id_1=str(residue_dict_c5[res_a] + 1),
-                    atom_id_2=str(residue_dict_c5[res_b] + 1),
-                ),
-                Bind(
-                    atom_id_1=str(residue_dict_c6[res_a] + 1),
-                    atom_id_2=str(residue_dict_c6[res_b] + 1),
-                ),
-                self.change_top(res_a, res_b),
-                Relax(),
-            ]
-            recipes.append(Recipe(recipe_steps=steps, rates=rates, timespans=timespans))
-
-        output_file.close()
+                steps = [
+                    Bind(
+                        atom_id_1=str(residue_dict_c5[res_a] + 1),
+                        atom_id_2=str(residue_dict_c5[res_b] + 1),
+                    ),
+                    Bind(
+                        atom_id_1=str(residue_dict_c6[res_a] + 1),
+                        atom_id_2=str(residue_dict_c6[res_b] + 1),
+                    ),
+                    self.change_top(res_a, res_b),
+                    Relax(),
+                ]
+                recipes.append(
+                    Recipe(recipe_steps=steps, rates=rates, timespans=timespans)
+                )
 
         return RecipeCollection(recipes)
