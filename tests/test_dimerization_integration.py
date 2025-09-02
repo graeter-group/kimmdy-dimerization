@@ -19,9 +19,6 @@ def read_last_line(file):
         return f.readline().decode()
 
 
-@pytest.mark.parametrize(
-    "arranged_tmp_path", (["test_dimerization_integration"]), indirect=True
-)
 def test_integration_dimerization_reaction(arranged_tmp_path):
     print(arranged_tmp_path)
     kimmdy_run(input="TdT_kimmdy.yml")
