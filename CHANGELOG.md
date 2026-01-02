@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0](https://github.com/graeter-group/kimmdy-dimerization/compare/v0.2.0...v0.3.0) (2025-09-02)
+
+
+### Features
+
+* integration tests for restarting ([#6](https://github.com/graeter-group/kimmdy-dimerization/issues/6)) ([1ec65fc](https://github.com/graeter-group/kimmdy-dimerization/commit/1ec65fce4bf1d424d7961ed8068429e98bdf2b6a))
+
 ## [0.2.0](https://github.com/graeter-group/kimmdy-dimerization/compare/v0.1.0...v0.2.0) (2025-08-28)
 
 
